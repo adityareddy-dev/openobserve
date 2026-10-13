@@ -4084,6 +4084,7 @@ dependencies = [
  "anyhow",
  "arrow",
  "arrow-schema",
+ "async-trait",
  "bytes",
  "chrono",
  "common",
