@@ -264,26 +264,6 @@ pub async fn has_processing_jobs(org: &str, table_name: &str) -> Result<bool, er
     Ok(count > 0)
 }
 
-/// Delete all URL jobs for a table
-///
-/// # Arguments
-/// * `org` - Organization name
-/// * `table_name` - Table name
-///
-/// # Returns
-/// * `Result<(), errors::Error>` - Success or error
-pub async fn delete_all_for_table(org: &str, table_name: &str) -> Result<(), errors::Error> {
-    let client = get_orm_client_rw().await;
-
-    Entity::delete_many()
-        .filter(Column::Org.eq(org))
-        .filter(Column::Name.eq(table_name))
-        .exec(client)
-        .await?;
-
-    Ok(())
-}
-
 /// Atomically claims stale jobs that are stuck in Processing status
 ///
 /// This function is used for stale job recovery in both single-node (SQLite) and distributed

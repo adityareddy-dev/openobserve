@@ -17,10 +17,6 @@ use base64::Engine;
 
 use super::db;
 
-pub async fn get_session(session_id: &str) -> Option<String> {
-    db::session::get(session_id).await.ok()
-}
-
 /// Extracts JWT expiry time from a Bearer token
 /// Returns expiry time in microseconds since epoch
 /// If extraction fails, returns a default expiry of 24 hours from now

@@ -317,15 +317,6 @@ pub async fn revoke_for_sessions_with<C: ConnectionTrait>(
     Ok(revoked)
 }
 
-/// Revoke every share of the chats `user_email` owns in `org_id` (they left it); returns how many.
-pub async fn revoke_for_owner(
-    org_id: &str,
-    user_email: &str,
-    now: i64,
-) -> Result<u64, errors::Error> {
-    revoke_for_owner_with(get_orm_client_rw().await, org_id, user_email, now).await
-}
-
 pub async fn revoke_for_owner_with<C: ConnectionTrait>(
     conn: &C,
     org_id: &str,

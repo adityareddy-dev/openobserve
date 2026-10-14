@@ -206,16 +206,6 @@ pub async fn add(
     add_with_flags(org_id, user_email, role, token, rum_token, true).await
 }
 
-pub async fn add_with_flag(
-    org_id: &str,
-    user_email: &str,
-    role: UserRole,
-    token: &str,
-    rum_token: Option<String>,
-) -> Result<(), errors::Error> {
-    add_with_flags(org_id, user_email, role, token, rum_token, true).await
-}
-
 pub async fn add_with_flags(
     org_id: &str,
     user_email: &str,

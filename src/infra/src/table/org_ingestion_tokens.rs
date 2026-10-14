@@ -20,8 +20,8 @@ use std::{
 
 use config::RwHashMap;
 use sea_orm::{
-    ColumnTrait, EntityTrait, FromQueryResult, NotSet, Order, PaginatorTrait, QueryFilter,
-    QueryOrder, QuerySelect, Set, entity::prelude::*, sea_query::OnConflict,
+    ColumnTrait, EntityTrait, FromQueryResult, NotSet, Order, QueryFilter, QueryOrder, QuerySelect,
+    Set, entity::prelude::*, sea_query::OnConflict,
 };
 use serde::{Deserialize, Deserializer, Serialize};
 
@@ -261,21 +261,6 @@ pub async fn list_splunk_guids_by_org(org_id: &str) -> Result<Vec<String>, error
     Ok(records)
 }
 
-/// Find an org ingestion token by value only (global — no org_id filter).
-/// Used for paths that have no org_id in the URL (e.g. synthetics job API).
-pub async fn find_enabled_token_global(
-    token: &str,
-) -> Result<Option<OrgIngestionTokenRecord>, errors::Error> {
-    let client = get_orm_client_ro().await;
-    let record = Entity::find()
-        .filter(Column::Token.eq(token))
-        .filter(Column::Enabled.eq(true))
-        .one(client)
-        .await
-        .map_err(|e| Error::DbError(DbError::SeaORMError(e.to_string())))?;
-    Ok(record.map(OrgIngestionTokenRecord::from))
-}
-
 /// Insert a new org ingestion token row.
 pub async fn add(record: &OrgIngestionTokenRecord) -> Result<(), errors::Error> {
     let now = chrono::Utc::now().timestamp_micros();
@@ -508,18 +493,6 @@ pub async fn remove_by_token(org_id: &str, token: &str) -> Result<(), errors::Er
 
     invalidate_default_cache(org_id);
     Ok(())
-}
-
-/// Count tokens for an org.
-pub async fn count_by_org(org_id: &str) -> Result<u64, errors::Error> {
-    let client = get_orm_client_ro().await;
-    let count = Entity::find()
-        .filter(Column::OrgId.eq(org_id))
-        .count(client)
-        .await
-        .map_err(|e| Error::DbError(DbError::SeaORMError(e.to_string())))?;
-
-    Ok(count)
 }
 
 /// Enable or disable a token by org_id and name.

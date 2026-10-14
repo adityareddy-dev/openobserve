@@ -321,16 +321,6 @@ pub async fn delete(entity_id: &str, org_id: &str) -> Result<(), errors::Error> 
     Ok(())
 }
 
-pub async fn delete_all_by_org(org_id: &str) -> Result<(), errors::Error> {
-    let client = get_orm_client_rw().await;
-    Entity::delete_many()
-        .filter(Column::OrgId.eq(org_id))
-        .exec(client)
-        .await?;
-
-    Ok(())
-}
-
 pub async fn exists(id: &str) -> Result<bool, errors::Error> {
     let client = get_orm_client_ro().await;
     let record = Entity::find().filter(Column::Id.eq(id)).one(client).await?;

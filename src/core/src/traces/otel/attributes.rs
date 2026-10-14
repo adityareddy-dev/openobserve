@@ -113,7 +113,6 @@ impl GenAiAttributes {
     pub const SYSTEM: &'static str = "gen_ai.system";
 
     // Gen-AI System Instructions (separate from input.messages)
-    pub const SYSTEM_INSTRUCTIONS: &'static str = "gen_ai.system_instructions";
 
     // Gen-AI Provider
     pub const PROVIDER_NAME: &'static str = "gen_ai.provider.name";
@@ -121,7 +120,6 @@ impl GenAiAttributes {
     // Gen-AI Agent
     pub const AGENT_NAME: &'static str = "gen_ai.agent.name";
     pub const AGENT_ID: &'static str = "gen_ai.agent.id";
-    pub const AGENT_DESCRIPTION: &'static str = "gen_ai.agent.description";
     pub const AGENT_VERSION: &'static str = "gen_ai.agent.version";
 }
 
@@ -225,7 +223,6 @@ impl OpenInferenceAttributes {
     // Agent name (OpenInference AGENT span).
     pub const AGENT_NAME: &'static str = "agent.name";
     // Graph-framework node identity (LangGraph via OpenInference).
-    pub const GRAPH_NODE_ID: &'static str = "graph.node.id";
 }
 
 /// Langfuse Attributes

@@ -74,11 +74,6 @@ pub struct WorkflowTestResult {
     outputs: HashMap<String, Vec<Value>>,
 }
 
-#[derive(Serialize)]
-pub struct WorkflowErrorList {
-    errors: Vec<WorkflowRunErrors>,
-}
-
 #[derive(Deserialize)]
 pub struct WorkflowRetryDetails {
     run_id: String,

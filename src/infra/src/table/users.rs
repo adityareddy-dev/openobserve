@@ -389,20 +389,6 @@ pub async fn is_empty() -> bool {
     len().await == 0
 }
 
-pub async fn batch_remove(emails: Vec<String>) -> Result<(), errors::Error> {
-    let client = get_orm_client_rw().await;
-    let lowered_emails: Vec<String> = emails.iter().map(|e| e.to_lowercase()).collect();
-    Entity::delete_many()
-        .filter(Expr::expr(Func::lower(Expr::col(Column::Email))).is_in(lowered_emails))
-        .exec(client)
-        .await
-        .map_err(|e| Error::DbError(DbError::SeaORMError(e.to_string())))?;
-
-    drop_auth_side_tables(&emails).await;
-
-    Ok(())
-}
-
 async fn drop_auth_side_tables(emails: &[String]) {
     for email in emails {
         if let Err(e) = super::user_password_history::delete_all_for_user(email).await {

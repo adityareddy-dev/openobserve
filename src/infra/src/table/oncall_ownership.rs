@@ -27,8 +27,7 @@ use config::{
     utils::time::now_micros,
 };
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder,
-    QuerySelect, Set,
+    ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, QueryOrder, QuerySelect, Set,
 };
 
 use super::entity::{oncall_ownership_rules, oncall_unrouted_signals};
@@ -416,16 +415,6 @@ pub async fn list_unrouted(
         .into_iter()
         .map(to_unrouted)
         .collect())
-}
-
-/// How many gaps are outstanding — the number a badge shows.
-pub async fn count_unrouted(org_id: &str) -> Result<u64, errors::Error> {
-    let client = get_orm_client_rw().await;
-    Ok(oncall_unrouted_signals::Entity::find()
-        .filter(oncall_unrouted_signals::Column::OrgId.eq(org_id))
-        .filter(oncall_unrouted_signals::Column::DismissedAt.is_null())
-        .count(client)
-        .await?)
 }
 
 /// Marks one entry handled. Returns `None` if it is gone.

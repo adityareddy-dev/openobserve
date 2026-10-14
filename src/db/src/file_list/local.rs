@@ -56,10 +56,6 @@ pub async fn get_pending_delete() -> Vec<String> {
     infra::file_list::pending_delete::list().await
 }
 
-pub async fn filter_by_pending_delete(files: Vec<String>) -> Vec<String> {
-    infra::file_list::pending_delete::filter(files).await
-}
-
 pub async fn load_pending_delete() -> Result<()> {
     let files = infra::file_list::LOCAL_CACHE.list_deleted().await?;
     for file in files {

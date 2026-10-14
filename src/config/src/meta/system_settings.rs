@@ -147,26 +147,6 @@ pub mod keys {
     pub const GEN_AI_AGENT_MAPPING: &str = "gen_ai_agent_mapping";
     /// Agent-signals failure taxonomy (error-detail fields + classification rules)
     pub const AGENT_SIGNALS_TAXONOMY: &str = "agent_signals_taxonomy";
-    /// UI theme preference
-    pub const THEME: &str = "theme";
-    /// Scrape interval for metrics
-    pub const SCRAPE_INTERVAL: &str = "scrape_interval";
-    /// Trace ID field name
-    pub const TRACE_ID_FIELD_NAME: &str = "trace_id_field_name";
-    /// Span ID field name
-    pub const SPAN_ID_FIELD_NAME: &str = "span_id_field_name";
-    /// Toggle ingestion logs
-    pub const TOGGLE_INGESTION_LOGS: &str = "toggle_ingestion_logs";
-    /// Streaming aggregation enabled
-    pub const STREAMING_AGGREGATION_ENABLED: &str = "streaming_aggregation_enabled";
-    /// Enable streaming search
-    pub const ENABLE_STREAMING_SEARCH: &str = "enable_streaming_search";
-    /// Minimum auto refresh interval
-    pub const MIN_AUTO_REFRESH_INTERVAL: &str = "min_auto_refresh_interval";
-    /// Light mode theme color
-    pub const LIGHT_MODE_THEME_COLOR: &str = "light_mode_theme_color";
-    /// Dark mode theme color
-    pub const DARK_MODE_THEME_COLOR: &str = "dark_mode_theme_color";
     /// Instance-wide authentication policy for native users
     pub const PASSWORD_POLICY: &str = "password_policy";
 }

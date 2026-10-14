@@ -321,20 +321,6 @@ pub async fn delete_org_settings(org_id: &str) -> Result<u64, anyhow::Error> {
     Ok(result.rows_affected)
 }
 
-/// Delete all settings for a user in an organization
-pub async fn delete_user_settings(org_id: &str, user_id: &str) -> Result<u64, anyhow::Error> {
-    let client = get_orm_client_rw().await;
-
-    let result = Entity::delete_many()
-        .filter(Column::OrgId.eq(org_id))
-        .filter(Column::UserId.eq(user_id))
-        .exec(client)
-        .await
-        .map_err(|e| anyhow!("DbError# {e}"))?;
-
-    Ok(result.rows_affected)
-}
-
 /// Convert DB model to domain type
 fn model_to_setting(model: Model) -> SystemSetting {
     SystemSetting {

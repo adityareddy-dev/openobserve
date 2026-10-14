@@ -247,42 +247,6 @@ pub async fn cleanup_expired_state(
     Ok(result.rows_affected)
 }
 
-/// Check for cross-alert semantic matches (when cross_alert_dedup is enabled)
-///
-/// Looks for any fingerprint containing the given semantic dimensions within the time window.
-/// Used to suppress alerts that share semantic dimensions with recently fired alerts.
-pub async fn find_matching_semantic_fingerprints(
-    db: &DatabaseConnection,
-    org_id: &str,
-    semantic_dimensions: &std::collections::HashMap<String, String>,
-    time_window_minutes: i64,
-) -> Result<Vec<alert_dedup_state::Model>, sea_orm::DbErr> {
-    let cutoff_time = o2_enterprise::enterprise::alerts::dedup::current_timestamp_micros()
-        - (time_window_minutes * 60 * 1_000_000);
-
-    // Get all recent fingerprints
-    let recent_states = alert_dedup_state::Entity::find()
-        .filter(alert_dedup_state::Column::OrgId.eq(org_id))
-        .filter(alert_dedup_state::Column::LastSeenAt.gt(cutoff_time))
-        .all(db)
-        .await?;
-
-    // Filter for matches with overlapping semantic dimensions
-    // Fingerprint format: "dim1=val1,dim2=val2,..."
-    let matching_states: Vec<_> = recent_states
-        .into_iter()
-        .filter(|state| {
-            // Parse fingerprint to check for dimension overlap
-            o2_enterprise::enterprise::alerts::dedup::fingerprint_matches_dimensions(
-                &state.fingerprint,
-                semantic_dimensions,
-            )
-        })
-        .collect();
-
-    Ok(matching_states)
-}
-
 /// Apply deduplication to alert result rows before sending notifications
 ///
 /// This is the main entry point for deduplication logic in the alert execution flow.

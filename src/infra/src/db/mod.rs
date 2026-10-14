@@ -40,11 +40,8 @@ pub static NEED_WATCH: bool = true;
 pub static NO_NEED_WATCH: bool = false;
 
 static DEFAULT: OnceCell<Box<dyn Db>> = OnceCell::const_new();
-static LOCAL_CACHE: OnceCell<Box<dyn Db>> = OnceCell::const_new();
 static CLUSTER_COORDINATOR: OnceCell<Box<dyn Db>> = OnceCell::const_new();
 static SUPER_CLUSTER: OnceCell<Box<dyn Db>> = OnceCell::const_new();
-
-pub const SQLITE_STORE: &str = "sqlite";
 
 static ORM_CLIENT_RO: OnceCell<DatabaseConnection> = OnceCell::const_new();
 pub(crate) static ORM_CLIENT_RW: OnceCell<DatabaseConnection> = OnceCell::const_new();
@@ -100,10 +97,6 @@ pub async fn get_db() -> &'static Box<dyn Db> {
     DEFAULT.get_or_init(default).await
 }
 
-pub async fn get_local_cache() -> &'static Box<dyn Db> {
-    LOCAL_CACHE.get_or_init(init_local_cache).await
-}
-
 pub async fn get_coordinator() -> &'static Box<dyn Db> {
     CLUSTER_COORDINATOR
         .get_or_init(init_cluster_coordinator)
@@ -130,10 +123,6 @@ async fn default() -> Box<dyn Db> {
         MetaStore::Nats => Box::<nats::NatsDb>::default(),
         MetaStore::PostgreSQL => Box::<postgres::PostgresDb>::default(),
     }
-}
-
-async fn init_local_cache() -> Box<dyn Db> {
-    Box::<sqlite::SqliteDb>::default()
 }
 
 async fn init_cluster_coordinator() -> Box<dyn Db> {

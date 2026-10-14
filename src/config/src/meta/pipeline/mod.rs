@@ -21,10 +21,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use crate::{
-    meta::{
-        function::VRLResultResolver,
-        stream::{StreamParams, StreamType},
-    },
+    meta::stream::{StreamParams, StreamType},
     stats::MemorySize,
     utils::json,
 };
@@ -32,12 +29,6 @@ use crate::{
 pub mod components;
 
 // (pipeline, node_map, graph, vrl_map)
-pub type PipelineExecDFS = (
-    Pipeline,
-    HashMap<String, NodeData>,
-    HashMap<String, Vec<String>>,
-    HashMap<String, VRLResultResolver>,
-);
 
 /// Distinguishes user-created pipelines from system-managed evaluation pipelines.
 ///

@@ -156,18 +156,6 @@ pub async fn find_state<C: ConnectionTrait>(
         .await
 }
 
-pub async fn find_all_by_ref<C: ConnectionTrait>(
-    db: &C,
-    org_id: &str,
-    secret_ref: &str,
-) -> Result<Vec<Model>, sea_orm::DbErr> {
-    Entity::find()
-        .filter(Column::OrgId.eq(org_id))
-        .filter(Column::SecretRef.eq(secret_ref))
-        .all(db)
-        .await
-}
-
 pub async fn find_all_by_owner<C: ConnectionTrait>(
     db: &C,
     org_id: &str,

@@ -628,15 +628,6 @@ pub struct OrganizationSettingResponse {
     pub data: OrganizationSetting,
 }
 
-/// Request struct for node listing with region filtering
-///
-/// Regions can be provided in the request body to filter nodes by region.
-/// If no regions are provided, all nodes will be returned.
-#[derive(Serialize, Deserialize, Default)]
-pub struct NodeListRequest {
-    /// List of region names to filter by
-    pub regions: Vec<String>,
-}
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct RegionInfo<T> {
     #[serde(flatten)]

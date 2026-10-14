@@ -184,11 +184,6 @@ mod tests {
 }
 
 #[cfg(not(feature = "enterprise"))]
-pub async fn write_aggregated_edges(_org_id: &str, _aggregated: ()) -> Result<(), anyhow::Error> {
-    Ok(())
-}
-
-#[cfg(not(feature = "enterprise"))]
 pub async fn write_sql_aggregated_edges(
     _org_id: &str,
     _stream_name: &str,

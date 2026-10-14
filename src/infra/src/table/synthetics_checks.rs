@@ -63,11 +63,6 @@ pub fn invalidate_cache(org_id: &str, id: &str) {
     SYNTHETIC_CACHE.remove(&synthetic_cache_key(org_id, id));
 }
 
-/// Drops the whole definition cache. Used where a write may touch many rows.
-pub fn invalidate_all_cache() {
-    SYNTHETIC_CACHE.clear();
-}
-
 /// Invalidates locally **and** tells every other node to do the same.
 ///
 /// Write paths call this; the coordinator watcher calls the plain

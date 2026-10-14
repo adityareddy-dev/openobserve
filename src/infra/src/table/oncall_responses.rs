@@ -302,13 +302,6 @@ pub async fn list_open(
         .collect())
 }
 
-/// How many records the same filter matches, so a paged screen can say what
-/// it is a page of. "Showing 50" is not an answer to "how bad is it".
-pub async fn count_open(org_id: &str, filter: &ResponseFilter<'_>) -> Result<u64, errors::Error> {
-    let client = get_orm_client_rw().await;
-    Ok(open_query(org_id, filter).count(client).await?)
-}
-
 fn open_query(org_id: &str, filter: &ResponseFilter<'_>) -> Select<oncall_responses::Entity> {
     let mut states = vec![
         ResponseState::Triggered.to_i32(),
@@ -488,24 +481,6 @@ pub async fn list_escalating(org_id: &str, limit: u64) -> Result<Vec<Response>, 
         .filter(oncall_responses::Column::OrgId.eq(org_id))
         .filter(oncall_responses::Column::State.is_in(escalating_states()))
         .order_by_asc(oncall_responses::Column::OpenedAt)
-        .limit(limit)
-        .all(client)
-        .await?
-        .into_iter()
-        .filter_map(to_response)
-        .collect())
-}
-
-pub async fn list_by_team(
-    org_id: &str,
-    team_id: &str,
-    limit: u64,
-) -> Result<Vec<Response>, errors::Error> {
-    let client = get_orm_client_rw().await;
-    Ok(oncall_responses::Entity::find()
-        .filter(oncall_responses::Column::OrgId.eq(org_id))
-        .filter(oncall_responses::Column::TeamId.eq(team_id))
-        .order_by_desc(oncall_responses::Column::OpenedAt)
         .limit(limit)
         .all(client)
         .await?

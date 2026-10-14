@@ -111,21 +111,6 @@ pub async fn save(rule: RuleEntry) -> Result<(), RatelimitError> {
     .await
 }
 
-pub async fn save_batch(rules: RuleEntry) -> Result<(), RatelimitError> {
-    let RuleEntry::UpsertBatch(_) = &rules else {
-        return Err(RatelimitError::NotSupportRuleEntry(
-            "Expected upsert batch rule entry".to_string(),
-        ));
-    };
-
-    handle_rule_operation(
-        rules.clone(),
-        RuleOperation::Save,
-        infra::table::ratelimit::add(rules),
-    )
-    .await
-}
-
 pub async fn update(rule: RuleEntry) -> Result<(), RatelimitError> {
     handle_rule_operation(
         rule.clone(),

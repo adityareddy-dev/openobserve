@@ -107,20 +107,6 @@ async fn get_total_usage_for_org_in<C: ConnectionTrait>(
     Ok(result.flatten().unwrap_or(0))
 }
 
-/// Get the explicitly configured shared usage limit for an organization.
-/// A missing value means the deployment-wide default still applies.
-pub async fn get_usage_limit_for_org(org_id: &str) -> Result<Option<i64>, sea_orm::DbErr> {
-    let db = get_orm_client_ro().await;
-    let result = trial_quota_usage::Entity::find()
-        .filter(trial_quota_usage::Column::OrgId.eq(org_id))
-        .select_only()
-        .column_as(trial_quota_usage::Column::UsageLimit.max(), "usage_limit")
-        .into_tuple::<Option<i64>>()
-        .one(db)
-        .await?;
-    Ok(result.flatten())
-}
-
 /// Every explicit `(org_id, feature, usage_limit)` triple — per FEATURE, not a
 /// per-org maximum: `MAX(usage_limit) GROUP BY org_id` would let a raised AI
 /// credit limit silently raise the one-time synthetics grant.
@@ -280,35 +266,6 @@ pub async fn load_all_paid_overage() -> Result<Vec<(String, String, bool)>, sea_
         .into_tuple()
         .all(get_orm_client_ro().await)
         .await
-}
-
-/// Get quota record for a specific org and feature.
-/// Used by the usage API endpoint.
-pub async fn get_for_org_feature(
-    org_id: &str,
-    feature: &str,
-) -> Result<Option<trial_quota_usage::Model>, sea_orm::DbErr> {
-    let db = get_orm_client_ro().await;
-    trial_quota_usage::Entity::find()
-        .filter(trial_quota_usage::Column::OrgId.eq(org_id))
-        .filter(trial_quota_usage::Column::Feature.eq(feature))
-        .one(db)
-        .await
-}
-
-/// Get the highest notified checkpoint for an org (across all feature rows).
-pub async fn get_notified_checkpoint(org_id: &str) -> Result<i16, sea_orm::DbErr> {
-    let db = get_orm_client_ro().await;
-    let result = trial_quota_usage::Entity::find()
-        .filter(trial_quota_usage::Column::OrgId.eq(org_id))
-        .column_as(
-            trial_quota_usage::Column::NotifiedCheckpoint.max(),
-            "max_checkpoint",
-        )
-        .into_tuple::<Option<i16>>()
-        .one(db)
-        .await?;
-    Ok(result.flatten().unwrap_or(0))
 }
 
 /// Stamp ONE pool's notification watermark, and only where it rises; `features` bounds the

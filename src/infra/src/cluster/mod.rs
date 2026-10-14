@@ -525,11 +525,6 @@ pub async fn get_cached_online_nodes() -> Option<Vec<Node>> {
 }
 
 #[inline]
-pub async fn get_cached_online_router_nodes() -> Option<Vec<Node>> {
-    get_cached_nodes(|node| node.status == NodeStatus::Online && node.is_router()).await
-}
-
-#[inline]
 pub async fn get_cached_online_query_nodes(group: Option<RoleGroup>) -> Option<Vec<Node>> {
     let nodes = get_cached_nodes(|node| {
         node.status == NodeStatus::Online && (node.is_querier() || node.is_ingester())

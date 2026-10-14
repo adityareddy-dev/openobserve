@@ -98,12 +98,6 @@ impl BloomBuilder {
         }
     }
 
-    /// Override the target FPR (only affects `begin`'s ndv-based sizing).
-    pub fn with_fpp(mut self, fpp: f64) -> Self {
-        self.fpp = fpp;
-        self
-    }
-
     /// Begin a bloom sized from `expected_items` at the builder's fpp.
     /// Prefer [`Self::begin_with_blocks`] for the transposed layout where
     /// the caller has already computed a group-uniform block count.

@@ -571,27 +571,6 @@ pub async fn get_active_trace_session() -> Result<Vec<OnlineEvalJob>, errors::Er
     Ok(records)
 }
 
-pub async fn get_by_stream(
-    org_id: &str,
-    stream: &str,
-    stream_type: &str,
-) -> Result<Vec<OnlineEvalJob>, errors::Error> {
-    let client = get_orm_client_ro().await;
-
-    let records = Entity::find()
-        .filter(Column::OrgId.eq(org_id))
-        .filter(Column::Stream.eq(stream))
-        .filter(Column::StreamType.eq(stream_type))
-        .order_by(Column::CreatedAt, Order::Desc)
-        .all(client)
-        .await?
-        .into_iter()
-        .map(OnlineEvalJob::from)
-        .collect();
-
-    Ok(records)
-}
-
 fn scorer_refs_contain(scorers: &[ScorerRef], scorer_entity_id: &str) -> bool {
     scorers.iter().any(|scorer| scorer.id == scorer_entity_id)
 }
@@ -619,16 +598,6 @@ pub async fn delete(id: &str) -> Result<(), errors::Error> {
     let client = get_orm_client_rw().await;
     Entity::delete_many()
         .filter(Column::Id.eq(id))
-        .exec(client)
-        .await?;
-
-    Ok(())
-}
-
-pub async fn delete_all_by_org(org_id: &str) -> Result<(), errors::Error> {
-    let client = get_orm_client_rw().await;
-    Entity::delete_many()
-        .filter(Column::OrgId.eq(org_id))
         .exec(client)
         .await?;
 

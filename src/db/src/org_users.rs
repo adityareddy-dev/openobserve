@@ -59,37 +59,6 @@ pub async fn add(
     Ok(())
 }
 
-pub async fn add_with_flag(
-    org_id: &str,
-    user_email: &str,
-    role: UserRole,
-    token: &str,
-    rum_token: Option<String>,
-) -> Result<(), anyhow::Error> {
-    let user_email = user_email.to_lowercase();
-    let key = format!("{ORG_USERS_KEY_PREFIX}single/{org_id}/{user_email}");
-    org_users::add_with_flag(org_id, &user_email, role.clone(), token, rum_token.clone())
-        .await
-        .map_err(|e| anyhow::anyhow!("Failed to add user to org: {e}"))?;
-
-    log::debug!("Put into db_coordinator: {user_email}");
-    let _ = put_into_db_coordinator(&key, Bytes::new(), true, None).await;
-
-    #[cfg(feature = "enterprise")]
-    super_cluster::org_user_add(
-        &key,
-        &OrgUserPut {
-            org_id: org_id.to_string(),
-            email: user_email.to_string(),
-            role,
-            token: token.to_string(),
-            rum_token,
-        },
-    )
-    .await?;
-    Ok(())
-}
-
 pub async fn add_with_flags(
     org_id: &str,
     user_email: &str,

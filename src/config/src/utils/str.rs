@@ -17,9 +17,6 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 
-pub static EMPTY_STRING: String = String::new();
-pub static EMPTY_STR: &str = "";
-
 /// Canonical email-validation regex (RFC 5321/5322 dot-atom form).
 ///
 /// Local part = one or more non-empty atoms separated by single dots (accepts single-char dotted

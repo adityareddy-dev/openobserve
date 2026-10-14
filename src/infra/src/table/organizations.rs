@@ -278,20 +278,6 @@ pub async fn list(filter: ListFilter) -> Result<Vec<OrganizationRecord>, errors:
     Ok(records)
 }
 
-pub async fn get_by_name(org_name: &str) -> Result<Vec<OrganizationRecord>, errors::Error> {
-    let client = get_orm_client_ro().await;
-    let records = Entity::find()
-        .filter(Column::OrgName.eq(org_name))
-        .all(client)
-        .await
-        .map_err(|e| Error::DbError(DbError::SeaORMError(e.to_string())))?
-        .into_iter()
-        .map(OrganizationRecord::from)
-        .collect();
-
-    Ok(records)
-}
-
 pub async fn len() -> usize {
     let client = get_orm_client_ro().await;
     let len = Entity::find().count(client).await;
@@ -317,24 +303,6 @@ pub async fn clear() -> Result<(), errors::Error> {
 
 pub async fn is_empty() -> bool {
     len().await == 0
-}
-
-pub async fn batch_remove(org_ids: Vec<String>) -> Result<(), errors::Error> {
-    let client = get_orm_client_rw().await;
-    Entity::delete_many()
-        .filter(Column::Identifier.is_in(org_ids.clone()))
-        .exec(client)
-        .await
-        .map_err(|e| Error::DbError(DbError::SeaORMError(e.to_string())))?;
-
-    {
-        let mut cache = CACHE.write().await;
-        for id in &org_ids {
-            cache.remove_entry(id);
-        }
-    }
-
-    Ok(())
 }
 
 pub async fn set_status(org_id: &str, status: &str) -> Result<(), errors::Error> {

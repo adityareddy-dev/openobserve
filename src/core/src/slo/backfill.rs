@@ -33,7 +33,7 @@ use config::{
     },
 };
 use infra::{
-    db::{get_orm_client_ro, get_orm_client_rw},
+    db::get_orm_client_rw,
     table::{entity::slo_backfill_jobs, slo as slo_table, slo_backfill_jobs as jobs},
 };
 use sea_orm::{DatabaseConnection, TransactionTrait};
@@ -157,13 +157,6 @@ pub fn clamp_backfill_start(
     align_up(floor, slice_interval_secs)
         .max(range_start)
         .min(range_end)
-}
-
-/// Whether a status row still needs its history filled.
-pub async fn is_needed(slo: &Slo) -> Result<bool, anyhow::Error> {
-    let db = get_orm_client_ro().await;
-    let status = slo_table::load_status(db, &slo.id, "").await?;
-    Ok(status.is_some_and(|s| s.definition_generation == slo.definition_generation))
 }
 
 /// [run_chunk] on `db`, measuring `[start, end)` with `measure(remeasure, start, end)`.

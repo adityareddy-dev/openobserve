@@ -129,12 +129,6 @@ pub async fn exists(org: &str, module: TriggerModule, key: &str) -> bool {
     infra_scheduler::get(org, module, key).await.is_ok()
 }
 
-/// The count of jobs for the given module (Report/Alert etc.)
-#[inline]
-pub async fn len_module(module: TriggerModule) -> usize {
-    infra_scheduler::len_module(module).await
-}
-
 #[inline]
 pub async fn len() -> usize {
     infra_scheduler::len().await

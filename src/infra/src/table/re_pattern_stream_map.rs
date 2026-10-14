@@ -277,22 +277,6 @@ pub async fn batch_process(
     Ok(())
 }
 
-pub async fn get_by_pattern_id(
-    pattern_id: &str,
-) -> Result<Vec<PatternAssociationEntry>, errors::Error> {
-    let client = get_orm_client_ro().await;
-    let res = Entity::find()
-        .filter(Column::PatternId.eq(pattern_id))
-        .into_model::<Model>()
-        .all(client)
-        .await?;
-    let ret = res
-        .into_iter()
-        .map(<Model as Into<PatternAssociationEntry>>::into)
-        .collect::<Vec<_>>();
-    Ok(ret)
-}
-
 pub async fn list_all() -> Result<Vec<PatternAssociationEntry>, errors::Error> {
     let client = get_orm_client_ro().await;
 

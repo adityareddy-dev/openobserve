@@ -134,28 +134,6 @@ pub async fn ingest(
     Ok(HecStatus::Success.into())
 }
 
-/// Ingest an already-parsed HEC body, returning each stream's write outcome.
-///
-/// [`parse_body`] prepares every event and [`preflight_streams`] runs every
-/// admission check for every stream group before the first write, so anything
-/// rejectable is rejected while nothing is persisted. A storage failure after
-/// the first stream has been written still cannot be rolled back — there is no
-/// cross-stream transaction — but it is reported rather than masked as success.
-///
-/// The "nothing is persisted" guarantee does NOT extend to a stream with a
-/// pipeline attached: see [`preflight_records`]'s KNOWN LIMITATION, where two
-/// rejections are unavoidably found inside the write loop.
-pub async fn ingest_parsed(
-    thread_id: usize,
-    org_id: &str,
-    parsed: HecParsed,
-    user: IngestUser,
-) -> Result<Vec<IngestionResponse>> {
-    let streams: Vec<(String, Vec<json::Value>)> = parsed.streams.into_iter().collect();
-    preflight_streams(org_id, &streams, &user).await?;
-    ingest_prepared(thread_id, org_id, streams, user).await
-}
-
 /// Write stream groups that [`preflight_streams`] has already admitted.
 ///
 /// Any error from here is a storage failure, not a rejection: groups written

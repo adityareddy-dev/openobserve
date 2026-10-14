@@ -26,17 +26,6 @@
 
 use sea_orm::entity::prelude::*;
 
-/// Where a backfill job is in its lifecycle.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(i32)]
-pub enum BackfillState {
-    Queued = 1,
-    Running = 2,
-    Done = 3,
-    Failed = 4,
-    Cancelled = 5,
-}
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
 #[sea_orm(table_name = "slo_backfill_jobs")]
 pub struct Model {

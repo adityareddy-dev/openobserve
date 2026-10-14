@@ -38,7 +38,6 @@ use utoipa::ToSchema;
 use super::stream::StreamType;
 
 pub const MAX_LIMIT: i64 = 100000;
-pub const MAX_OFFSET: i64 = 100000;
 const MAX_WHERE_SQL_BYTES: usize = 128 * 1024;
 
 pub static SQL_RESERVED_KEYWORDS: LazyLock<Vec<String>> = LazyLock::new(|| {

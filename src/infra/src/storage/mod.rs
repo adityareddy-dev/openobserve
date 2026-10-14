@@ -317,15 +317,6 @@ pub async fn get_bytes(account: &str, file: &str) -> Result<bytes::Bytes> {
     data.bytes().await
 }
 
-pub async fn get_opts_bytes(
-    account: &str,
-    file: &str,
-    options: GetOptions,
-) -> Result<bytes::Bytes> {
-    let data = get_opts(account, file, options).await?;
-    data.bytes().await
-}
-
 pub async fn put(account: &str, file: &str, data: bytes::Bytes) -> Result<()> {
     let multi_part_upload_size = get_config().s3.multi_part_upload_size;
     if multi_part_upload_size > 0 && multi_part_upload_size < bytes_size_in_mb(&data) as usize {

@@ -924,12 +924,6 @@ pub struct BrowserSecret {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct BrowserViewport {
-    pub width: u32,
-    pub height: u32,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BrowserCapture {
     #[serde(default = "capture_on_fail")]
     pub screenshot: String,
@@ -1386,13 +1380,6 @@ const LOCATOR_ORIGINS: &[&str] = &["recorded", "authored", "composite"];
 /// not a schema migration. `.or()` is deliberately absent: it unions in DOM
 /// order and so destroys the preference the ordered bundle exists to express.
 const COMPOSITE_RELATIONS: &[&str] = &["and", "has", "has_not", "descendant"];
-
-/// The recorder's test-id attribute when a check does not set one.
-///
-/// `data-test` rather than Playwright's `data-testid`: OpenObserve's own
-/// frontend marks interactive elements with it, and self-monitoring is this
-/// feature's acceptance test (X-1's o2.introspect checks).
-pub const DEFAULT_TEST_ID_ATTR: &str = "data-test";
 
 /// Longest attribute name accepted. A DOM attribute name this long is not a
 /// configuration, it is a paste accident.

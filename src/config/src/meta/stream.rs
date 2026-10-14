@@ -86,27 +86,6 @@ impl FromStr for DataType {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema, Default)]
-pub struct DataField {
-    pub name: String,
-    pub r#type: DataType,
-}
-
-impl DataField {
-    pub fn new(name: &str, r#type: DataType) -> Self {
-        Self {
-            name: name.to_string(),
-            r#type,
-        }
-    }
-}
-
-impl PartialEq for DataField {
-    fn eq(&self, other: &Self) -> bool {
-        self.name == other.name && self.r#type == other.r#type
-    }
-}
-
 pub const ALL_STREAM_TYPES: [StreamType; 9] = [
     StreamType::Logs,
     StreamType::Metrics,

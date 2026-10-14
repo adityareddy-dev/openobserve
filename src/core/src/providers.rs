@@ -275,16 +275,6 @@ async fn publish_provider_delete(provider_id: &str) {
 #[cfg(not(feature = "enterprise"))]
 async fn publish_provider_delete(_provider_id: &str) {}
 
-#[tracing::instrument()]
-pub async fn get_default_provider(
-    org_id: &str,
-) -> Result<table::providers::Provider, ProviderError> {
-    let provider = table::providers::get_default(org_id)
-        .await?
-        .ok_or(ProviderError::NotFound)?;
-    Ok(provider)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

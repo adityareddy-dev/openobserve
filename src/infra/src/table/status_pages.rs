@@ -553,27 +553,6 @@ pub async fn count_components(org_id: &str, page_id: &str) -> Result<i64, errors
         .await? as i64)
 }
 
-/// The distinct pages a set of components belong to — a notice's write path
-/// needs this to know which pages' cached snapshots to refresh out of band
-/// (a notice is org-scoped and can touch components across several pages).
-pub async fn pages_for_components(
-    org_id: &str,
-    component_ids: &[String],
-) -> Result<Vec<String>, errors::Error> {
-    let conn = get_orm_client_ro().await;
-    let ids: std::collections::HashSet<String> = status_page_components::Entity::find()
-        .select_only()
-        .column(status_page_components::Column::StatusPageId)
-        .filter(status_page_components::Column::Id.is_in(component_ids.iter().cloned()))
-        .filter(status_page_components::Column::OrgId.eq(org_id))
-        .into_tuple::<String>()
-        .all(conn)
-        .await?
-        .into_iter()
-        .collect();
-    Ok(ids.into_iter().collect())
-}
-
 // ── Super-cluster apply (raw writes; called by the OSS applier, anti-loop) ────
 // These deserialize a replicated row and upsert/delete it by primary key. They
 // go through the entity layer directly and NEVER the service layer (which

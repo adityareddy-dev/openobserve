@@ -74,11 +74,6 @@ pub async fn set_result(id: &str, result: &str) -> Result<(), errors::Error> {
     set_result_with(client, id, result).await
 }
 
-pub async fn delete_for_downtime(org: &str, downtime_id: &str) -> Result<u64, errors::Error> {
-    let client = get_orm_client_rw().await;
-    delete_for_downtime_with(client, org, downtime_id).await
-}
-
 pub async fn insert_if_absent_with<C: ConnectionTrait>(
     conn: &C,
     record: &DowntimeNotification,

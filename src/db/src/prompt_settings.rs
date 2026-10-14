@@ -164,30 +164,6 @@ pub async fn set_webhook_secret(
     Ok(written)
 }
 
-pub async fn resolve_webhook_secret(org_id: &str) -> Result<Vec<u8>, PromptSettingsError> {
-    let settings = get(org_id).await?;
-    let secret_ref = settings
-        .webhook
-        .and_then(|webhook| webhook.secret_ref)
-        .ok_or(PromptSettingsError::SecretNotConfigured)?;
-    let (_, material) = secrets::resolve_record(
-        org_id,
-        &secret_ref,
-        SecretOwnerKind::PromptWebhook,
-        org_id,
-        secrets::CURRENT,
-    )
-    .await?;
-    match material {
-        SecretMaterial::Token { value } => Ok(value.into_bytes()),
-        SecretMaterial::Basic { .. } => Err(PromptSettingsError::InvalidSecretMaterial),
-    }
-}
-
-pub async fn delete_webhook_secret(org_id: &str) -> Result<u64, PromptSettingsError> {
-    Ok(secrets::delete_for_owner(org_id, SecretOwnerKind::PromptWebhook, org_id).await?)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

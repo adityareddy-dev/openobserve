@@ -244,10 +244,6 @@ pub fn record_rejection(org_id: &str, rejection: IngestRejection) {
     LIVE.record(org_id, rejection, now_micros());
 }
 
-pub fn org_has_user_data(org_id: &str) -> bool {
-    LIVE.has_user_data(org_id, now_micros())
-}
-
 pub async fn read_rejections(org_id: &str) -> RecentRejections {
     LIVE.read(org_id, now_micros()).await.0
 }

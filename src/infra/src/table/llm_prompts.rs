@@ -266,20 +266,6 @@ pub async fn insert_delivery<C: ConnectionTrait>(
     model.insert(db).await
 }
 
-pub async fn due_deliveries<C: ConnectionTrait>(
-    db: &C,
-    now: i64,
-    limit: u64,
-) -> Result<Vec<deliveries::Model>, sea_orm::DbErr> {
-    deliveries::Entity::find()
-        .filter(deliveries::Column::Status.eq("pending"))
-        .filter(deliveries::Column::NextAttemptAt.lte(now))
-        .order_by_asc(deliveries::Column::NextAttemptAt)
-        .limit(limit)
-        .all(db)
-        .await
-}
-
 /// Claims due deliveries by moving their due time to a short lease in the same
 /// transaction that selects them.
 pub async fn claim_due_deliveries(

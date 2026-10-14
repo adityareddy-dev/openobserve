@@ -19,7 +19,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use vrl::{
-    compiler::{CompileConfig, Program, TimeZone, VrlRuntime},
+    compiler::{CompileConfig, Program},
     prelude::Function,
 };
 
@@ -146,12 +146,6 @@ pub struct ZoFunction<'a> {
 #[derive(Clone, Debug, Serialize, Deserialize, ToSchema)]
 pub struct FunctionList {
     pub list: Vec<Transform>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct VRLConfig {
-    pub runtime: VrlRuntime,
-    pub timezone: TimeZone,
 }
 
 fn default_trans_type() -> Option<u8> {

@@ -237,13 +237,6 @@ impl FakeStreamChecker {
             .insert((user_id.to_string(), format!("{org_id}/cipher_keys/{key}")));
     }
 
-    pub fn grant_dashboard(&self, org_id: &str, user_id: &str, folder: &str, dashboard_id: &str) {
-        write_set(&self.grants).insert((
-            user_id.to_string(),
-            format!("{org_id}/dashboards/{folder}/{dashboard_id}"),
-        ));
-    }
-
     fn granted(&self, user_id: &str, key: String) -> bool {
         self.grants
             .read()

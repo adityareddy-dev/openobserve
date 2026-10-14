@@ -41,10 +41,7 @@ pub const MERGE_WINDOW_MICROS: i64 = 10 * 60 * 1_000_000;
 /// Days of public history.
 pub const HISTORY_DAYS: usize = 90;
 
-/// `synthetics.last_check_status` values (entity/synthetics_checks.rs).
-pub const CHECK_STATUS_UNKNOWN: i32 = 0;
 pub const CHECK_STATUS_UP: i32 = 1;
-pub const CHECK_STATUS_WARNING: i32 = 2;
 pub const CHECK_STATUS_DOWN: i32 = 3;
 
 const MICROS_PER_MIN: i64 = 60 * 1_000_000;

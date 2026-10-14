@@ -15,7 +15,7 @@
 
 use std::{
     borrow::{Borrow, Cow},
-    io::{BufRead, Seek},
+    io::BufRead,
     sync::{Arc, LazyLock as Lazy},
 };
 
@@ -40,15 +40,6 @@ pub fn infer_json_schema<R: BufRead>(
     stream_type: StreamType,
 ) -> Result<Schema, ArrowError> {
     let (schema, _) = reader::infer_json_schema(reader, max_read_records)?;
-    Ok(fix_schema(schema, stream_type))
-}
-
-pub fn infer_json_schema_from_seekable<R: BufRead + Seek>(
-    reader: R,
-    max_read_records: Option<usize>,
-    stream_type: StreamType,
-) -> Result<Schema, ArrowError> {
-    let (schema, _) = reader::infer_json_schema_from_seekable(reader, max_read_records)?;
     Ok(fix_schema(schema, stream_type))
 }
 

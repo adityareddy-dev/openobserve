@@ -27,15 +27,6 @@ pub async fn emit_put_event() -> Result<(), Error> {
     Ok(())
 }
 
-/// Sends event to the cluster coordinator indicating that AI prompt
-/// has been rolled back to default system prompt
-pub async fn emit_rollback_event() -> Result<(), Error> {
-    let cluster_coordinator = super::get_coordinator().await;
-    cluster_coordinator
-        .delete(AI_PROMPTS_WATCH_PREFIX, false, true, None)
-        .await
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

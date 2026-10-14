@@ -259,10 +259,6 @@ pub struct ArchivedRcaReport {
     pub archived_at: i64,
 }
 
-/// Default number of superseded RCA reports to retain per incident.
-/// Overridden by `O2_INCIDENTS_RCA_HISTORY_LIMIT`.
-pub const DEFAULT_RCA_HISTORY_LIMIT: usize = 25;
-
 /// Alert flow graph showing how alerts cascaded across services over time
 #[derive(Debug, Clone, Default, Serialize, Deserialize, ToSchema)]
 pub struct IncidentTopology {

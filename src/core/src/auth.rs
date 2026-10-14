@@ -33,11 +33,7 @@ use lru::LruCache;
 use parking_lot::Mutex;
 use sha2::{Digest, Sha256};
 #[cfg(feature = "enterprise")]
-use {
-    crate::users::get_user, db::user::is_root_user, jsonwebtoken::TokenData,
-    o2_dex::service::auth::get_dex_jwks, o2_openfga::meta::mapping::OFGA_MODELS, serde_json::Value,
-    std::str::FromStr,
-};
+use {crate::users::get_user, db::user::is_root_user, o2_openfga::meta::mapping::OFGA_MODELS};
 
 pub const V2_API_PREFIX: &str = "v2";
 pub const SESSION_AUTH_MARKER: &str = "Session::";
@@ -745,91 +741,6 @@ pub async fn check_folder_write_permissions(
         true,
     )
     .await
-}
-
-#[cfg(feature = "enterprise")]
-pub async fn extract_auth_expiry_and_user_id(
-    parts: &Parts,
-) -> (Option<chrono::DateTime<chrono::Utc>>, Option<String>) {
-    let decode = async |token: &str| match decode_expiry(token).await {
-        Ok(token_data) => token_data
-            .claims
-            .get("exp")
-            .and_then(|exp| exp.as_i64())
-            .and_then(|exp_ts| chrono::DateTime::from_timestamp(exp_ts, 0)),
-        Err(e) => {
-            log::error!("Error verifying token: {e}");
-            None
-        }
-    };
-
-    let auth_str = extract_auth_str_from_headers(&parts.headers).await;
-    if auth_str.is_empty() {
-        return (None, None);
-    } else if auth_str.starts_with("Basic") {
-        let user_id = get_user_email_from_auth_str(&auth_str).await;
-        return (None, user_id);
-    } else if auth_str.starts_with("Bearer") {
-        let user_id = get_user_email_from_auth_str(&auth_str).await;
-        let stripped_bearer_token = auth_str.strip_prefix("Bearer ").unwrap();
-        let exp = decode(stripped_bearer_token).await;
-        return (exp, user_id);
-    } else if auth_str.starts_with("session ") {
-        let session_key = auth_str.strip_prefix("session ").unwrap();
-        let stripped_bearer_token = match crate::db::session::get(session_key).await {
-            Ok(bearer_token) => bearer_token,
-            Err(e) => {
-                log::error!("Error getting session: {e}");
-                return (None, None);
-            }
-        };
-        let exp = decode(&stripped_bearer_token).await;
-        let bearer_full_token = format!("Bearer {stripped_bearer_token}");
-        let user_id = get_user_email_from_auth_str(&bearer_full_token).await;
-        return (exp, user_id);
-    }
-    (None, None)
-}
-
-#[cfg(feature = "enterprise")]
-async fn decode_expiry(token: &str) -> Result<TokenData<HashMap<String, Value>>, anyhow::Error> {
-    use infra::errors::JwtError;
-    use jsonwebtoken::{
-        Algorithm, DecodingKey, Validation, decode, decode_header,
-        jwk::{self, AlgorithmParameters},
-    };
-
-    let header = decode_header(token)?;
-    let kid = match header.kid {
-        Some(k) => k,
-        None => return Err(JwtError::MissingAttribute("`kid` header".to_owned()).into()),
-    };
-    let dex_jwks = get_dex_jwks().await;
-    let jwks: jwk::JwkSet = serde_json::from_str(&dex_jwks).unwrap();
-
-    if let Some(j) = jwks.find(&kid) {
-        match &j.algorithm {
-            AlgorithmParameters::RSA(rsa) => {
-                let decoding_key = DecodingKey::from_rsa_components(&rsa.n, &rsa.e).unwrap();
-
-                let mut validation = Validation::new(
-                    Algorithm::from_str(j.common.key_algorithm.unwrap().to_string().as_str())
-                        .unwrap(),
-                );
-                validation.validate_exp = true;
-                let aud = &o2_dex::config::get_config().client_id;
-                validation.set_audience(&[aud]);
-                Ok(decode::<HashMap<String, serde_json::Value>>(
-                    token,
-                    &decoding_key,
-                    &validation,
-                )?)
-            }
-            _ => Err(JwtError::ValidationFailed().into()),
-        }
-    } else {
-        Err(JwtError::KeyNotExists().into())
-    }
 }
 
 pub fn build_basic_auth_header(email: &str, token: &str) -> String {

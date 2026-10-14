@@ -783,14 +783,6 @@ where
     Ok(())
 }
 
-/// Transitions for one alert, newest first.
-pub async fn list_transitions(
-    alert_id: &str,
-    limit: u64,
-) -> Result<Vec<StateTransition>, errors::Error> {
-    list_transitions_filtered(alert_id, None, limit).await
-}
-
 /// Transitions for one alert, newest first, optionally scoped to one group
 /// (M-8: the history drawer's group filter).
 ///
@@ -948,17 +940,6 @@ pub async fn delete_by_alert_with<C: sea_orm::ConnectionTrait + TransactionTrait
         .exec(&txn)
         .await?;
     txn.commit().await?;
-    Ok(())
-}
-
-/// Retention for the append-only transition log. Governed by audit needs, set
-/// independently of the `triggers` stream retention.
-pub async fn delete_transitions_before(cutoff: i64) -> Result<(), errors::Error> {
-    let client = get_orm_client_rw().await;
-    alert_state_transitions::Entity::delete_many()
-        .filter(alert_state_transitions::Column::At.lt(cutoff))
-        .exec(client)
-        .await?;
     Ok(())
 }
 

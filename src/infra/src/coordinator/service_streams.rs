@@ -37,16 +37,6 @@ pub async fn emit_put_event(org_id: &str) -> Result<(), Error> {
     Ok(())
 }
 
-/// Sends event to the cluster coordinator indicating that a specific service
-/// has been deleted.
-///
-/// The event key format is: /service_streams/{org_id}/{service_key}
-pub async fn emit_delete_event(org_id: &str, service_key: &str) -> Result<(), Error> {
-    let key = format!("{}{}/{}", SERVICE_STREAMS_WATCH_PREFIX, org_id, service_key);
-    let cluster_coordinator = super::get_coordinator().await;
-    cluster_coordinator.delete(&key, false, true, None).await
-}
-
 /// Sends event to indicate that all services for an org should be reloaded.
 /// This is useful after bulk operations.
 pub async fn emit_reload_event(org_id: &str) -> Result<(), Error> {

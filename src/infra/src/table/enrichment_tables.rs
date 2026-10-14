@@ -237,30 +237,6 @@ pub async fn get_meta_stats(org: &str, table_name: &str) -> Option<EnrichmentTab
         .ok()
 }
 
-/// Get all enrichment table records for a specific organization
-///
-/// # Arguments
-/// * `org` - Organization name
-///
-/// # Returns
-/// * `Result<Vec<EnrichmentTableRecord>, errors::Error>` - List of records or error
-pub async fn get_by_org(org: &str) -> Result<Vec<EnrichmentTableRecord>, errors::Error> {
-    let client = get_orm_client_ro().await;
-    let records = Entity::find()
-        .select_only()
-        .column(Column::Org)
-        .column(Column::Name)
-        .column(Column::Data)
-        .column(Column::CreatedAt)
-        .filter(Column::Org.eq(org))
-        .order_by(Column::CreatedAt, Order::Desc)
-        .into_model::<EnrichmentTableRecord>()
-        .all(client)
-        .await?;
-
-    Ok(records)
-}
-
 /// Check if any enrichment table records exist for a specific organization and table name
 ///
 /// # Arguments
@@ -279,25 +255,6 @@ pub async fn contains(org: &str, table_name: &str) -> Result<bool, errors::Error
         .await?;
 
     Ok(record.is_some())
-}
-
-/// Get the count of enrichment table records for a specific organization and table name
-///
-/// # Arguments
-/// * `org` - Organization name
-/// * `table_name` - Table name
-///
-/// # Returns
-/// * `Result<usize, errors::Error>` - Count of records
-pub async fn count_by_org_and_name(org: &str, table_name: &str) -> Result<usize, errors::Error> {
-    let client = get_orm_client_ro().await;
-    let count = Entity::find()
-        .filter(Column::Org.eq(org))
-        .filter(Column::Name.eq(table_name))
-        .count(client)
-        .await?;
-
-    Ok(count as usize)
 }
 
 /// Get the total count of enrichment table records

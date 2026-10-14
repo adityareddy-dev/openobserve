@@ -542,16 +542,6 @@ pub async fn enable_backfill_job(
     Ok(())
 }
 
-#[deprecated(note = "Use enable_backfill_job with enable=false instead")]
-pub async fn pause_backfill_job(org_id: &str, job_id: &str) -> Result<(), anyhow::Error> {
-    enable_backfill_job(org_id, job_id, false).await
-}
-
-#[deprecated(note = "Use enable_backfill_job with enable=true instead")]
-pub async fn resume_backfill_job(org_id: &str, job_id: &str) -> Result<(), anyhow::Error> {
-    enable_backfill_job(org_id, job_id, true).await
-}
-
 /// Every check [`update_backfill_job`] makes before it writes, so a caller can answer them first.
 pub async fn check_backfill_update(
     org_id: &str,

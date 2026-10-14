@@ -1217,15 +1217,6 @@ pub async fn handle_workflow_trigger(trigger: WorkflowTrigger) {
     log::info!("[workflow_trigger {trace_id}] run id {run_id} completed execution");
 }
 
-pub async fn get_data_for_run(
-    org_id: &str,
-    workflow_id: &str,
-    run_id: &str,
-) -> Result<Option<String>, anyhow::Error> {
-    let ret = infra::table::workflows::get_run_data(org_id, workflow_id, run_id).await?;
-    Ok(ret)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

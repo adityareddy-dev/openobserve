@@ -127,17 +127,6 @@ impl FieldAlias {
     pub fn default_presets() -> Vec<Self> {
         vec![]
     }
-
-    /// Load default semantic groups
-    ///
-    /// For OSS builds, this returns the minimal preset.
-    /// For enterprise builds with full JSON, call
-    /// `o2_enterprise::enterprise::common::semantic_config::load_defaults_from_file()`
-    /// instead.
-    pub fn load_defaults_from_file() -> Vec<Self> {
-        // OSS fallback: return minimal preset
-        Self::default_presets()
-    }
 }
 
 const MAX_SETS: usize = 5;

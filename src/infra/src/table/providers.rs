@@ -207,38 +207,10 @@ pub async fn get_all_by_org(org_id: &str) -> Result<Vec<Provider>, errors::Error
         .collect()
 }
 
-pub async fn get_default(org_id: &str) -> Result<Option<Provider>, errors::Error> {
-    let client = get_orm_client_ro().await;
-
-    let model = Entity::find()
-        .filter(Column::OrgId.eq(org_id))
-        .filter(Column::IsDefault.eq(true))
-        .one(client)
-        .await?;
-
-    match model {
-        Some(m) => {
-            let dek = cipher::get_dek(org_id).await?;
-            model_to_provider(m, &dek).map(Some)
-        }
-        None => Ok(None),
-    }
-}
-
 pub async fn delete(id: &str) -> Result<(), errors::Error> {
     let client = get_orm_client_rw().await;
     Entity::delete_many()
         .filter(Column::Id.eq(id))
-        .exec(client)
-        .await?;
-
-    Ok(())
-}
-
-pub async fn delete_all_by_org(org_id: &str) -> Result<(), errors::Error> {
-    let client = get_orm_client_rw().await;
-    Entity::delete_many()
-        .filter(Column::OrgId.eq(org_id))
         .exec(client)
         .await?;
 

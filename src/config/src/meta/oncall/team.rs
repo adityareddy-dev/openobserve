@@ -20,8 +20,8 @@ use utoipa::ToSchema;
 
 use super::rotation::{
     AwayShift, CoverageSegment, DEFAULT_ROTATION_NAME, GridError, MAX_AWAY_SHIFTS, OnCallPosition,
-    Rotation, ScheduleOverride, ShiftRule, Unavailability, away_assignments, colliding_rotations,
-    everyone_on_call, resolve_on_call, resolve_window,
+    Rotation, ScheduleOverride, ShiftRule, Unavailability, away_assignments, everyone_on_call,
+    resolve_on_call, resolve_window,
 };
 
 /// A group of people who can be paged together.
@@ -234,31 +234,9 @@ impl Schedule {
         self.timezone.parse().unwrap_or(chrono_tz::UTC)
     }
 
-    /// This team's rotations, in stored order.
-    ///
-    /// Replaced `slots()`, which reported names from three sources — rotations
-    /// that staffed a slot, rotations that declared they derived one, and an
-    /// implicit append. Two of the three produced positions with no roster.
-    pub fn rotation_names(&self) -> Vec<String> {
-        self.rotations
-            .iter()
-            .filter(|r| r.validate().is_ok())
-            .map(|r| r.name.clone())
-            .collect()
-    }
-
     /// A rotation by id. What a level of the escalation policy resolves with.
     pub fn rotation(&self, rotation_id: &str) -> Option<&Rotation> {
         self.rotations.iter().find(|r| r.id == rotation_id)
-    }
-
-    /// Whether this team staffs more than one position.
-    pub fn has_several_rotations(&self) -> bool {
-        self.rotations
-            .iter()
-            .filter(|r| r.validate().is_ok())
-            .count()
-            > 1
     }
 
     /// The rotation a team's first level pages when nothing says otherwise: the
@@ -301,18 +279,6 @@ impl Schedule {
     /// Everybody this team currently has on call, across every rotation.
     pub fn everyone_on_call(&self, at: i64) -> Vec<String> {
         everyone_on_call(
-            &self.rotations,
-            &self.overrides,
-            &self.unavailability,
-            at,
-            self.tz(),
-        )
-    }
-
-    /// Rotations that resolve to the same person at `at` — one pager, two
-    /// positions. Reported, not prevented; see [`colliding_rotations`].
-    pub fn collisions_at(&self, at: i64) -> Vec<(String, Vec<&Rotation>)> {
-        colliding_rotations(
             &self.rotations,
             &self.overrides,
             &self.unavailability,

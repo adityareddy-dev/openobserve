@@ -186,13 +186,6 @@ impl BloomReader {
         self.by_field.keys().map(String::as_str)
     }
 
-    /// True iff this footer carries `(field, file_id)`.
-    pub fn has_entry(&self, field: &str, file_id: u64) -> bool {
-        self.by_field
-            .get(field)
-            .is_some_and(|s| s.by_file.contains_key(&file_id))
-    }
-
     /// Byte range of the block row that answers `value` for **every file**
     /// in this field, plus the hash for [`check_block_with_hash`].
     ///

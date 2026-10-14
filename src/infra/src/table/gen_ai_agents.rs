@@ -181,14 +181,6 @@ pub async fn delete(
     Ok(query.exec(client).await?.rows_affected)
 }
 
-pub async fn delete_for_stream(
-    org_id: &str,
-    source_stream: &str,
-    source_stream_type: &str,
-) -> Result<u64, errors::Error> {
-    delete(org_id, Some(source_stream), Some(source_stream_type)).await
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

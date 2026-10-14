@@ -45,7 +45,6 @@ use crate::{
 };
 
 pub type FxIndexMap<K, V> = indexmap::IndexMap<K, V, ahash::RandomState>;
-pub type FxIndexSet<K> = indexmap::IndexSet<K, ahash::RandomState>;
 pub type RwHashMap<K, V> = dashmap::DashMap<K, V, ahash::RandomState>;
 pub type RwHashSet<K> = dashmap::DashSet<K, ahash::RandomState>;
 pub type RwAHashMap<K, V> = tokio::sync::RwLock<HashMap<K, V>>;
@@ -147,10 +146,8 @@ pub fn get_batch_size() -> usize {
 }
 
 pub const FILE_EXT_JSON: &str = ".json";
-pub const FILE_EXT_ARROW: &str = ".arrow";
 pub const FILE_EXT_PARQUET: &str = ".parquet";
 pub const FILE_EXT_VORTEX: &str = ".vortex";
-pub const FILE_EXT_PUFFIN: &str = ".puffin";
 pub const FILE_EXT_TANTIVY: &str = ".ttv";
 
 pub const INDEX_FIELD_NAME_FOR_ALL: &str = "_all";

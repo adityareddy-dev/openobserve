@@ -492,19 +492,6 @@ pub async fn get_url_job_by_id(
     }
 }
 
-/// Delete a specific URL job by its ID
-pub async fn delete_url_job_by_id(job_id: &str) -> Result<(), infra::errors::Error> {
-    enrichment_table_urls::delete_by_id(job_id).await
-}
-
-/// Check if any URL jobs are currently processing for a table
-pub async fn has_processing_url_jobs(
-    org_id: &str,
-    table_name: &str,
-) -> Result<bool, infra::errors::Error> {
-    enrichment_table_urls::has_processing_jobs(org_id, table_name).await
-}
-
 /// List all enrichment table URL jobs for an organization
 pub async fn list_url_jobs(
     org_id: &str,

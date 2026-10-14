@@ -15,8 +15,7 @@
 
 use config::meta::ai::{AIPrompt, PromptType};
 use sea_orm::{
-    ColumnTrait, ConnectionTrait, EntityTrait, Order, PaginatorTrait, QueryFilter, QueryOrder,
-    QuerySelect, Schema, Set,
+    ColumnTrait, ConnectionTrait, EntityTrait, PaginatorTrait, QueryFilter, Schema, Set,
 };
 
 use super::entity::system_prompts::Model;
@@ -98,32 +97,6 @@ pub async fn get(r#type: PromptType) -> Result<Option<AIPrompt>, errors::Error> 
         .transpose()?;
 
     Ok(record)
-}
-
-/// Returns the system prompt and the user prompt.
-///
-/// If the user prompt is not found, it returns None
-pub async fn get_all() -> Result<(Option<AIPrompt>, Option<AIPrompt>), errors::Error> {
-    let client = get_orm_client_ro().await;
-    let res = Entity::find()
-        // This limit doesn't matter much, but still
-        .limit(2)
-        .order_by(Column::Type, Order::Asc);
-
-    let records = res
-        .all(client)
-        .await?
-        .into_iter()
-        .map(AIPrompt::try_from)
-        .collect::<Result<Vec<AIPrompt>, errors::Error>>()?;
-
-    let user_prompt = records
-        .iter()
-        .find(|p| p.r#type == PromptType::User)
-        .cloned();
-    let system_prompt = records.into_iter().find(|p| p.r#type == PromptType::System);
-
-    Ok((system_prompt, user_prompt))
 }
 
 pub async fn exists(r#type: PromptType) -> Result<bool, errors::Error> {

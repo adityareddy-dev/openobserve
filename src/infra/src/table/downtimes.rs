@@ -144,12 +144,6 @@ pub async fn move_to_folder(
     move_to_folder_with(client, org, ids, dst_folder_id).await
 }
 
-/// Rows filed in the folder with this primary key; guards folder deletion.
-pub async fn count_by_folder(org: &str, folder_pk: &str) -> Result<u64, errors::Error> {
-    let client = get_orm_client_ro().await;
-    count_by_folder_with(client, org, folder_pk).await
-}
-
 /// Readies a folder for deletion: false if a live row is filed there, else its tombstones go.
 pub async fn release_folder(org: &str, folder_pk: &str) -> Result<bool, errors::Error> {
     let client = get_orm_client_rw().await;

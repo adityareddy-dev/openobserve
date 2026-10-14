@@ -193,28 +193,6 @@ pub async fn get_by_id(pipeline_id: &str) -> Result<Pipeline, PipelineError> {
     Ok(db_pipeline::get_by_id(pipeline_id).await?)
 }
 
-/// Returns the owning org for a pipeline id from the in-memory `PIPELINE_ID_TO_ORG` cache.
-///
-/// On a cache miss this falls back to a DB read so callers do not see false negatives during
-/// startup or briefly after a pipeline is created. The cache is populated for every pipeline
-/// (enabled or disabled, realtime or scheduled) by `cache_id_to_org()` and kept in sync by the
-/// `watch()` loop.
-pub async fn get_org_by_id(pipeline_id: &str) -> Option<String> {
-    if let Some(org) = PIPELINE_ID_TO_ORG.read().await.get(pipeline_id).cloned() {
-        return Some(org);
-    }
-    match db_pipeline::get_by_id(pipeline_id).await {
-        Ok(p) => {
-            PIPELINE_ID_TO_ORG
-                .write()
-                .await
-                .insert(p.id.clone(), p.org.clone());
-            Some(p.org)
-        }
-        Err(_) => None,
-    }
-}
-
 /// Populates `PIPELINE_ID_TO_ORG` from the DB. Lightweight — does not initialize any
 /// `ExecutablePipeline` and is safe to call on every node type (routers included).
 pub async fn cache_id_to_org() -> Result<(), anyhow::Error> {
@@ -252,24 +230,6 @@ pub async fn cache_scheduled_pipeline(pipeline: &Pipeline) {
 /// Removes a scheduled pipeline from the cache.
 pub async fn remove_scheduled_pipeline_from_cache(pipeline_id: &str) {
     SCHEDULED_PIPELINES.write().await.remove(pipeline_id);
-}
-
-/// Returns the number of scheduled pipelines in the cache.
-pub async fn get_scheduled_pipelines_cache_size() -> usize {
-    SCHEDULED_PIPELINES.read().await.len()
-}
-
-/// Returns cache statistics for monitoring.
-pub async fn get_cache_stats() -> (usize, usize) {
-    let realtime_count = STREAM_EXECUTABLE_PIPELINES.read().await.len();
-    let scheduled_count = SCHEDULED_PIPELINES.read().await.len();
-    (realtime_count, scheduled_count)
-}
-
-/// Clears the scheduled pipelines cache. Used for maintenance.
-pub async fn clear_scheduled_pipelines_cache() {
-    SCHEDULED_PIPELINES.write().await.clear();
-    log::info!("[Pipeline] Scheduled pipelines cache cleared");
 }
 
 /// Finds the pipelines with the same source

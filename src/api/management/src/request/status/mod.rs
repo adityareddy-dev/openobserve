@@ -29,7 +29,7 @@ use config::{
     Config, META_ORG_ID, QUICK_MODEL_FIELDS, SQL_FULL_TEXT_SEARCH_FIELDS,
     SQL_SECONDARY_INDEX_SEARCH_FIELDS, TIMESTAMP_COL_NAME,
     cluster::LOCAL_NODE,
-    get_config, get_instance_id,
+    get_config,
     meta::{
         cluster::{NodeStatus, Role, RoleGroup},
         function::ZoFunction,
@@ -1021,75 +1021,6 @@ pub async fn config_reload(Headers(user_email): Headers<UserEmail>) -> impl Into
     (
         StatusCode::OK,
         axum::Json(serde_json::json!({"status": status})),
-    )
-}
-
-/// Recursively walk through a JSON object and redact sensitive values
-fn hide_sensitive_fields(value: &mut serde_json::Value) {
-    if let Some(obj) = value.as_object_mut() {
-        for (key, val) in obj.iter_mut() {
-            let key_lower = key.to_lowercase();
-
-            // Simple rule: contains any of these sensitive keywords
-            // Also hide header values that might contain credentials
-            let is_sensitive = key_lower.contains("password")
-                || key_lower.contains("secret")
-                || key_lower.contains("key")
-                || key_lower.contains("auth")
-                || key_lower.contains("token")
-                || key_lower.contains("credential")
-                || (key_lower.contains("header") && key_lower.contains("value"));
-
-            if is_sensitive && let Some(s) = val.as_str() {
-                *val = if s.is_empty() {
-                    serde_json::json!("[not set]")
-                } else {
-                    serde_json::json!("[hidden]")
-                };
-            }
-
-            if val.is_object() {
-                hide_sensitive_fields(val);
-            }
-        }
-    }
-}
-
-pub async fn config_runtime() -> impl IntoResponse {
-    let cfg = get_config();
-    let mut config_value = match serde_json::to_value(cfg.as_ref()) {
-        Ok(v) => v,
-        Err(e) => {
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                axum::Json(
-                    serde_json::json!({"error": format!("Failed to serialize config: {e}")}),
-                ),
-            );
-        }
-    };
-
-    hide_sensitive_fields(&mut config_value);
-
-    const METADATA_KEY: &str = "_metadata";
-    let metadata_response = json::json!({
-        "version": config::VERSION,
-        "commit_hash": config::COMMIT_HASH,
-        "build_date": config::BUILD_DATE,
-        "instance_id": get_instance_id(),
-    });
-
-    let mut final_response = if let serde_json::Value::Object(o) = config_value {
-        o
-    } else {
-        serde_json::Map::new()
-    };
-
-    final_response.insert(METADATA_KEY.to_string(), metadata_response);
-
-    (
-        StatusCode::OK,
-        axum::Json(serde_json::Value::Object(final_response)),
     )
 }
 

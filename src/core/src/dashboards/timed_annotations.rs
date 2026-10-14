@@ -169,21 +169,6 @@ mod super_cluster {
     }
 
     // TODO: remove if not required
-    /// Sends event to super cluster queue for a new timed annotation panels entry.
-    pub async fn _emit_timed_annotation_panels_put_event(
-        timed_annotation_id: &str,
-        panels: Vec<String>,
-    ) -> Result<(), infra::errors::Error> {
-        if get_o2_config().super_cluster.enabled {
-            o2_enterprise::enterprise::super_cluster::queue::timed_annotation_panels_put(
-                timed_annotation_id,
-                panels,
-            )
-            .await
-            .map_err(|e| infra::errors::Error::Message(e.to_string()))?;
-        }
-        Ok(())
-    }
 
     /// Sends event to super cluster queue for a deleted timed annotation panels entry.
     pub async fn emit_timed_annotation_panels_delete_event(

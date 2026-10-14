@@ -143,26 +143,6 @@ pub async fn create_token(
     })
 }
 
-/// Rotate a token's value; returns the new full, unmasked value.
-pub async fn rotate_token(org_id: &str, name: &str) -> Result<OrgIngestionToken, anyhow::Error> {
-    let existing = db::org_ingestion_tokens::get_by_name(org_id, name)
-        .await?
-        .ok_or_else(|| anyhow::anyhow!("Token '{}' not found", name))?;
-
-    let new_token = db::org_ingestion_tokens::rotate_token(org_id, name).await?;
-
-    Ok(OrgIngestionToken {
-        name: existing.name,
-        token: new_token,
-        description: existing.description,
-        is_default: existing.is_default,
-        enabled: existing.enabled,
-        created_by: existing.created_by,
-        created_at: existing.created_at,
-        splunk_token: existing.splunk_token.flatten(),
-    })
-}
-
 /// Enable or disable a named token.
 pub async fn set_enabled_token(
     org_id: &str,

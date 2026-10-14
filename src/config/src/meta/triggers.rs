@@ -73,11 +73,6 @@ impl std::fmt::Display for TriggerModule {
     }
 }
 
-#[derive(sqlx::FromRow, Debug, Clone, Default)]
-pub struct TriggerId {
-    pub id: i64,
-}
-
 #[derive(sqlx::FromRow, Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Trigger {
     pub id: i64,

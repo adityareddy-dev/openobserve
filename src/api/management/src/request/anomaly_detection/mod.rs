@@ -591,13 +591,6 @@ pub async fn get_detection_history(
 // Request/Response types
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
-pub struct FilterRequest {
-    pub field: String,
-    pub operator: String,
-    pub value: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
 pub struct HistoryQuery {
     pub limit: Option<i64>,
 }

@@ -596,13 +596,6 @@ pub async fn set_paid_overage_enabled_for_pool(
     Ok(())
 }
 
-/// Persist and publish an explicit lifetime AI credit limit for an org — the
-/// AI-pool spelling of [`set_limit_for_pool`], which is what the `_meta` admin
-/// endpoint means by "credits".
-pub async fn set_limit(org_id: &str, usage_limit: u64) -> Result<(), anyhow::Error> {
-    set_limit_for_pool(org_id, TrialQuotaPool::AiCredits, usage_limit).await
-}
-
 /// Reconcile explicit limits from the database. This runs on the existing
 /// flush interval so missed or out-of-order HA messages remain short-lived.
 ///
@@ -992,11 +985,6 @@ pub fn get_used_for_pool(org_id: &str, pool: TrialQuotaPool) -> u64 {
 /// Get one pool's limit for an org, falling back to the deployment-wide default.
 pub fn get_limit_for_pool(org_id: &str, pool: TrialQuotaPool) -> u64 {
     get_pool_limit(org_id, pool)
-}
-
-/// Get remaining credits in the org's AI pool.
-pub fn get_remaining(org_id: &str) -> u64 {
-    get_remaining_for_pool(org_id, TrialQuotaPool::AiCredits)
 }
 
 /// Get total AI credits used across the AI features for an org.
@@ -1509,18 +1497,6 @@ pub fn get_quota_percentage(org_id: &str) -> u8 {
     let used = get_pool_used(org_id, pool);
     let pct = (used * 100 / limit).min(100);
     pct as u8
-}
-
-/// Returns the next checkpoint to notify for the org, or None if already notified.
-///
-/// Walks the QUOTA_CHECKPOINTS list and returns the highest checkpoint that
-/// the org's usage has reached but hasn't been notified about yet.
-pub async fn get_pending_checkpoint(org_id: &str) -> Option<u8> {
-    let pct = get_quota_percentage(org_id);
-    let already_notified = infra::table::trial_quota_usage::get_notified_checkpoint(org_id)
-        .await
-        .unwrap_or(0) as u8;
-    pending_checkpoint_from(pct, already_notified)
 }
 
 /// Compute the pending checkpoint given a pre-fetched usage percentage and

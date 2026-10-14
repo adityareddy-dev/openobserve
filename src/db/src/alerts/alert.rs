@@ -741,19 +741,6 @@ mod super_cluster {
         Ok(())
     }
 
-    /// Sends event to the super cluster queue indicating that all alert have
-    /// been deleted from the database.
-    pub async fn _emit_delete_all_event() -> Result<(), infra::errors::Error> {
-        let o2_config = get_o2_config();
-        let oss_config = get_config();
-        if o2_config.super_cluster.enabled && !oss_config.common.local_mode {
-            o2_enterprise::enterprise::super_cluster::queue::delete("/alerts/", true, false, None)
-                .await
-                .map_err(|e| Error::Message(e.to_string()))?;
-        }
-        Ok(())
-    }
-
     /// Returns the key used to identify an individual alert in events sent to
     /// the super cluster queue.
     fn alert_key(

@@ -121,18 +121,6 @@ pub async fn get_report_and_folder_from_id<C: ConnectionTrait>(
     Ok(result)
 }
 
-/// Tries to get a report SeaORM entity by its ID.
-pub async fn _get_report_from_id<C: ConnectionTrait>(
-    conn: &C,
-    report_id: &str,
-) -> Result<Option<reports::Model>, sea_orm::DbErr> {
-    let result = reports::Entity::find()
-        .filter(reports::Column::Id.eq(report_id))
-        .one(conn)
-        .await?;
-    Ok(result)
-}
-
 /// A result of querying for the related `report_dashboards`, `dashboards`, and dashboard `folder`
 /// records for a single `reports` record.
 ///

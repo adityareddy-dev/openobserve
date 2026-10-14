@@ -256,44 +256,6 @@ pub async fn delete_org_settings(org_id: &str) -> Result<u64> {
     Ok(result)
 }
 
-/// Delete all settings for a user in an organization
-pub async fn delete_user_settings(org_id: &str, user_id: &str) -> Result<u64> {
-    let result = db::delete_user_settings(org_id, user_id)
-        .await
-        .map_err(|e| infra::errors::Error::Message(e.to_string()))?;
-
-    // Clear user settings from cache, then emit events after releasing lock
-    let keys_to_remove: Vec<String> = {
-        let mut cache = SYSTEM_SETTINGS.write().await;
-        let keys: Vec<String> = cache
-            .iter()
-            .filter(|(k, _)| {
-                let parts: Vec<&str> = k.split(':').collect();
-                parts.len() >= 3 && parts[1] == org_id && parts[2] == user_id
-            })
-            .map(|(k, _)| k.clone())
-            .collect();
-        for key in &keys {
-            cache.remove(key);
-        }
-        keys
-    }; // Lock released here
-
-    // Emit events without holding lock
-    for key in &keys_to_remove {
-        let event_key = format!("{}{}", SYSTEM_SETTINGS_WATCHER_PREFIX, key);
-        if let Err(e) = infra::coordinator::system_settings::emit_delete_event(&event_key).await {
-            log::error!(
-                "Failed to emit system settings delete event for {}: {}",
-                key,
-                e
-            );
-        }
-    }
-
-    Ok(result)
-}
-
 /// Initialize cache with all system settings from database
 pub async fn cache() -> Result<()> {
     let settings = db::list(None, None, None, None)
@@ -322,22 +284,6 @@ pub async fn create_watcher() -> Result<impl Future<Output = Result<()>>> {
         .await
         .map_err(|e| infra::errors::Error::Message(e.to_string()))?;
     Ok(watch_events(events))
-}
-
-/// Invalidate cache for a specific setting
-pub async fn invalidate_cache(
-    scope: &SettingScope,
-    org_id: Option<&str>,
-    user_id: Option<&str>,
-    key: &str,
-) {
-    let cache_k = cache_key(scope, org_id, user_id, key);
-    SYSTEM_SETTINGS.write().await.remove(&cache_k);
-}
-
-/// Invalidate entire cache
-pub async fn invalidate_all_cache() {
-    SYSTEM_SETTINGS.write().await.clear();
 }
 
 /// Get semantic field groups for an organization
@@ -449,30 +395,6 @@ pub fn get_default_semantic_field_groups() -> Vec<config::meta::correlation::Fie
     {
         vec![]
     }
-}
-
-/// Save the agent-signals failure taxonomy for an organization.
-///
-/// Validates before persisting — org input is compiled into generated SQL, so an
-/// invalid taxonomy is rejected here rather than at query time.
-pub async fn set_agent_signals_taxonomy(
-    org_id: &str,
-    user_id: &str,
-    taxonomy: config::meta::agent_signals::AgentSignalsTaxonomy,
-) -> Result<SystemSetting> {
-    use config::meta::system_settings::{SettingCategory, keys::AGENT_SIGNALS_TAXONOMY};
-
-    let taxonomy = taxonomy.normalize_and_validate().map_err(|e| {
-        infra::errors::Error::Message(format!("invalid agent-signals taxonomy: {e}"))
-    })?;
-
-    let value = serde_json::to_value(taxonomy)?;
-    let mut setting = SystemSetting::new_org(org_id, AGENT_SIGNALS_TAXONOMY, value)
-        .with_category(SettingCategory::Correlation)
-        .with_description("Agent-signals failure taxonomy (error-detail fields + rules)");
-    setting.updated_by = Some(user_id.to_string());
-
-    set(&setting).await
 }
 
 /// Normalize a semantic group category name to a consistent identity set ID
@@ -627,25 +549,6 @@ pub async fn get_service_identity_config(
     }
 
     config
-}
-
-/// Get the updated_at timestamp for semantic_field_groups setting
-///
-/// Returns the timestamp (in microseconds since epoch) when the semantic field groups
-/// configuration was last updated. This is used for time-based FQN selection to prefer
-/// services that were processed after the most recent configuration change.
-///
-/// Returns 0 if no org-level setting exists (uses defaults).
-pub async fn get_semantic_field_groups_updated_at(org_id: &str) -> i64 {
-    use config::meta::system_settings::keys::SEMANTIC_FIELD_GROUPS;
-
-    // Get the settings record (not just the value)
-    if let Ok(Some(setting)) = get_resolved(Some(org_id), None, SEMANTIC_FIELD_GROUPS).await {
-        setting.updated_at
-    } else {
-        // No org-level setting found - using defaults (return 0 = epoch)
-        0
-    }
 }
 
 async fn watch_events(mut events: Arc<tokio::sync::mpsc::Receiver<super::Event>>) -> Result<()> {

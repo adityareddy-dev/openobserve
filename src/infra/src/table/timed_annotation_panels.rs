@@ -17,22 +17,7 @@ use config::ider;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, Set, TransactionTrait};
 
 use super::entity::{dashboards, timed_annotation_panels, timed_annotations};
-use crate::{
-    db::{get_orm_client_ro, get_orm_client_rw},
-    errors,
-};
-
-pub async fn get_panels(timed_annotation_id: &str) -> Result<Vec<String>, errors::Error> {
-    let client = get_orm_client_ro().await;
-    let panels = timed_annotation_panels::Entity::find()
-        .filter(timed_annotation_panels::Column::TimedAnnotationId.eq(timed_annotation_id))
-        .all(client)
-        .await?;
-
-    let panel_ids: Vec<String> = panels.into_iter().map(|panel| panel.panel_id).collect();
-
-    Ok(panel_ids)
-}
+use crate::{db::get_orm_client_rw, errors};
 
 pub async fn insert_many_panels(
     timed_annotation_id: &str,
