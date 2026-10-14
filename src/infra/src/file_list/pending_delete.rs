@@ -14,10 +14,6 @@ static PENDING_DELETE_FILES: Lazy<RwLock<HashSet<String>>> =
     Lazy::new(|| RwLock::new(HashSet::new()));
 static REMOVING_FILES: Lazy<RwLock<HashSet<String>>> = Lazy::new(|| RwLock::new(HashSet::new()));
 
-pub async fn exist(file: &str) -> bool {
-    PENDING_DELETE_FILES.read().await.contains(file)
-}
-
 pub async fn register(file: &str) {
     PENDING_DELETE_FILES.write().await.insert(file.to_string());
 }

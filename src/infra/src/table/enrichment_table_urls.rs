@@ -16,8 +16,6 @@
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter, QuerySelect, Set, entity::prelude::*};
 use serde::{Deserialize, Serialize};
 
-// Status constants for enrichment table URL jobs
-const STATUS_PROCESSING: i16 = 1;
 // Re-export the entity for convenience
 pub use crate::table::entity::enrichment_table_urls::{
     ActiveModel, Column, Entity, Model, Relation,
@@ -225,45 +223,6 @@ pub async fn get_by_id(job_id: &str) -> Result<Option<EnrichmentTableUrlRecord>,
     Ok(record.map(|model| model.into()))
 }
 
-/// Delete a specific URL job by ID
-///
-/// # Arguments
-/// * `job_id` - The KSUID of the job to delete
-///
-/// # Returns
-/// * `Result<(), errors::Error>` - Success or error
-pub async fn delete_by_id(job_id: &str) -> Result<(), errors::Error> {
-    let client = get_orm_client_rw().await;
-
-    Entity::delete_many()
-        .filter(Column::Id.eq(job_id))
-        .exec(client)
-        .await?;
-
-    Ok(())
-}
-
-/// Check if any jobs are in processing status for a table
-///
-/// # Arguments
-/// * `org` - Organization name
-/// * `table_name` - Table name
-///
-/// # Returns
-/// * `Result<bool, errors::Error>` - true if any job is processing
-pub async fn has_processing_jobs(org: &str, table_name: &str) -> Result<bool, errors::Error> {
-    let client = get_orm_client_ro().await;
-
-    let count = Entity::find()
-        .filter(Column::Org.eq(org))
-        .filter(Column::Name.eq(table_name))
-        .filter(Column::Status.eq(STATUS_PROCESSING))
-        .count(client)
-        .await?;
-
-    Ok(count > 0)
-}
-
 /// Atomically claims stale jobs that are stuck in Processing status
 ///
 /// This function is used for stale job recovery in both single-node (SQLite) and distributed
@@ -386,15 +345,6 @@ pub async fn delete_by_org(org: &str) -> Result<(), errors::Error> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[tokio::test]
-    async fn test_has_processing_jobs() {
-        // Test with non-existent table - should return false or error
-        let result = has_processing_jobs("test_org", "test_table").await;
-        // In test environment without DB, this will error or return false
-        // The test validates the function signature
-        assert!(result.is_ok() || result.is_err());
-    }
 
     fn make_model() -> Model {
         Model {

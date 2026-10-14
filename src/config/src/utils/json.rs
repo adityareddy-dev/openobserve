@@ -84,28 +84,6 @@ pub fn get_int_value(val: &Value) -> i64 {
     }
 }
 
-pub fn get_uint_value(val: &Value) -> u64 {
-    match val {
-        Value::String(v) => v.parse::<u64>().unwrap_or(0),
-        // i64 is negative, u64 is positive, f64 needs to be converted to u64
-        Value::Number(v) => match v.as_u64() {
-            Some(v) => v,
-            None => v.as_f64().unwrap_or(0.0) as u64,
-        },
-        Value::Bool(v) if *v => 1,
-        _ => 0,
-    }
-}
-
-pub fn get_bool_value(val: &Value) -> bool {
-    match val {
-        Value::String(v) => v.parse::<bool>().unwrap_or(false),
-        Value::Number(v) => v.as_f64().unwrap_or(0.0) > 0.0,
-        Value::Bool(v) => *v,
-        _ => false,
-    }
-}
-
 pub fn get_string_value(value: &Value) -> String {
     if value.is_string() {
         value.as_str().unwrap_or_default().to_string()
@@ -456,31 +434,6 @@ mod tests {
         assert_eq!(get_int_value(&Value::Bool(false)), 0);
         assert_eq!(get_int_value(&Value::Null), 0);
         assert_eq!(get_int_value(&Value::Array(vec![])), 0);
-
-        // Test get_uint_value
-        assert_eq!(get_uint_value(&Value::String("123".to_string())), 123);
-        assert_eq!(get_uint_value(&Value::String("invalid".to_string())), 0);
-        assert_eq!(get_uint_value(&Value::Number(Number::from(42u64))), 42);
-        assert_eq!(
-            get_uint_value(&Value::Number(Number::from_f64(3.25).unwrap())),
-            3
-        );
-        assert_eq!(get_uint_value(&Value::Bool(true)), 1);
-        assert_eq!(get_uint_value(&Value::Bool(false)), 0);
-        assert_eq!(get_uint_value(&Value::Null), 0);
-        assert_eq!(get_uint_value(&Value::Array(vec![])), 0);
-
-        // Test get_bool_value
-        assert!(get_bool_value(&Value::String("true".to_string())));
-        assert!(!get_bool_value(&Value::String("false".to_string())));
-        assert!(!get_bool_value(&Value::String("invalid".to_string())));
-        assert!(get_bool_value(&Value::Number(Number::from(1))));
-        assert!(!get_bool_value(&Value::Number(Number::from(0))));
-        assert!(get_bool_value(&Value::Number(Number::from(42))));
-        assert!(get_bool_value(&Value::Bool(true)));
-        assert!(!get_bool_value(&Value::Bool(false)));
-        assert!(!get_bool_value(&Value::Null));
-        assert!(!get_bool_value(&Value::Array(vec![])));
 
         // Test get_string_value
         assert_eq!(
