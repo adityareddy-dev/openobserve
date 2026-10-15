@@ -1197,7 +1197,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 data-cy="search-bar-refresh-button"
                 :data-run-pending="showRunQueryPending ? 'true' : undefined"
                 :aria-label="showRunQueryPending ? t('search.runQueryPendingLabel') : undefined"
-                :variant="showRunQueryPending ? 'warning' : 'primary'"
+                :variant="showRunQueryPending ? 'pending' : 'primary'"
                 :title="
                   isNaturalLanguageDetected && !searchObj.meta.nlpMode
                     ? t('search.generateQueryTooltip')
@@ -1212,6 +1212,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   showRunQueryPending || (isNaturalLanguageDetected && !searchObj.meta.nlpMode)
                     ? ''
                     : 'bg-button-primary! text-button-primary-foreground! hover:shadow-button-primary/70 hover:opacity-90 hover:shadow-md',
+                  showRunQueryPending ? 'border-e-button-pending-divider!' : '',
                   'rounded-s-default! rounded-e-none!',
                 ]"
                 @click="
@@ -1255,11 +1256,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     : t("search.runQuery")
                 }}
               </OButton>
-              <OSeparator class="h-[1.875rem]! w-px" vertical />
+              <OSeparator
+                v-if="!showRunQueryPending || isRunQueryCancelShown"
+                class="h-[1.875rem]! w-px"
+                vertical
+              />
               <ODropdown align="end" side="bottom">
                 <template #trigger>
                   <OButton
-                    :variant="showRunQueryPending && !isRunQueryCancelShown ? 'warning' : 'ghost'"
+                    :variant="showRunQueryPending && !isRunQueryCancelShown ? 'pending' : 'ghost'"
                     size="icon-xs"
                     data-test="logs-search-bar-refresh-cache-dropdown-trigger"
                     :class="[
@@ -1268,7 +1273,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         : !(isNaturalLanguageDetected && !searchObj.meta.nlpMode) &&
                             !showRunQueryPending
                           ? 'bg-button-primary! text-button-primary-foreground! hover:shadow-button-primary/70 hover:opacity-90 hover:shadow-md'
-                          : '',
+                          : showRunQueryPending
+                            ? 'border-s-0'
+                            : '',
                       'rounded-e-default! rounded-s-none!',
                     ]"
                   >
