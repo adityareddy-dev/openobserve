@@ -51,3 +51,15 @@ describe("enterprise routes: allowOnEmptyData", () => {
     },
   );
 });
+
+describe("enterprise routes: lazy loading", () => {
+  it("lazy-loads every route component", () => {
+    const { parentRoutes, homeChildRoutes } = useEnvRoutes();
+    const walk = (routes: any[]): void =>
+      routes.forEach((route) => {
+        if (route.component) expect(typeof route.component, route.path).toBe("function");
+        if (route.children) walk(route.children);
+      });
+    walk([...parentRoutes, ...homeChildRoutes]);
+  });
+});
