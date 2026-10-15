@@ -85,6 +85,11 @@ pub(crate) fn expected_schema() -> Result<arrow_schema::Schema> {
     )?)
 }
 
+/// Forget that the org's triggers stream was set up, so a reused org id is set up and seeded again.
+pub(crate) fn forget_org(org_id: &str) {
+    INITIALIZED_ORGS.remove(org_id);
+}
+
 /// Internal function that performs the actual schema initialization.
 /// This should only be called by ensure_triggers_stream_initialized.
 ///
@@ -201,5 +206,12 @@ mod tests {
 
         // Verify it's marked as initialized
         assert!(INITIALIZED_ORGS.contains(test_org));
+    }
+
+    #[test]
+    fn test_forget_org_drops_the_setup_mark() {
+        INITIALIZED_ORGS.insert("forget_org_triggers".to_string());
+        forget_org("forget_org_triggers");
+        assert!(!INITIALIZED_ORGS.contains("forget_org_triggers"));
     }
 }

@@ -1498,6 +1498,12 @@ pub async fn acknowledge(
     Path(org_id): Path<String>,
     axum::Form(form): axum::Form<AckQuery>,
 ) -> Response {
+    // The route sits outside the blocked-org gate, so a leaked link must die with its org here.
+    if let Some(refusal) =
+        crate::request::alerts::external_events::inactive_org_response(&org_id).await
+    {
+        return refusal;
+    }
     #[cfg(feature = "enterprise")]
     {
         use o2_enterprise::enterprise::oncall::{escalation, service, token};
@@ -1569,6 +1575,11 @@ fn ack_redirect(org_id: &str, response_id: &str) -> Response {
 )]
 /// GET must only look: mail gateways fetch URLs, so a scanner would take the page first.
 pub async fn ack_page(Path(org_id): Path<String>, Query(q): Query<AckQuery>) -> Response {
+    if let Some(refusal) =
+        crate::request::alerts::external_events::inactive_org_response(&org_id).await
+    {
+        return refusal;
+    }
     #[cfg(feature = "enterprise")]
     {
         use o2_enterprise::enterprise::oncall::service;
@@ -4277,6 +4288,29 @@ pub async fn promote_to_incident(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[tokio::test]
+    async fn test_ack_routes_refuse_a_blocked_org() {
+        let org = "oncall-ack-blocked-org";
+        common::infra::config::ORG_STATUS_CACHE
+            .insert(org.into(), common::meta::organization::OrgStatus::Deleting);
+        let token = || AckQuery {
+            token: "leaked".to_string(),
+        };
+        let posted = acknowledge(Path(org.to_string()), axum::Form(token())).await;
+        let fetched = ack_page(Path(org.to_string()), Query(token())).await;
+        common::infra::config::ORG_STATUS_CACHE.remove(org);
+        for resp in [posted, fetched] {
+            assert_eq!(resp.status(), axum::http::StatusCode::FORBIDDEN);
+            let body = axum::body::to_bytes(resp.into_body(), usize::MAX)
+                .await
+                .unwrap();
+            assert!(
+                String::from_utf8_lossy(&body).contains("organization is not active"),
+                "{body:?}"
+            );
+        }
+    }
 
     #[test]
     fn test_create_team_defaults_to_utc() {

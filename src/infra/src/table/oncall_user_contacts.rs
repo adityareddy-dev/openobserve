@@ -16,7 +16,7 @@
 //! Per-user contact profiles — `architecture/03` §5.
 
 use config::{ider, meta::oncall::Contact};
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
+use sea_orm::{ActiveModelTrait, ColumnTrait, ConnectionTrait, EntityTrait, QueryFilter, Set};
 
 use super::entity::oncall_user_contacts;
 use crate::{db::get_orm_client_rw, errors};
@@ -130,6 +130,14 @@ pub async fn delete(org_id: &str, user_email: &str) -> Result<bool, errors::Erro
         .exec(client)
         .await?;
     Ok(deleted.rows_affected > 0)
+}
+
+pub async fn delete_by_org<C: ConnectionTrait>(db: &C, org_id: &str) -> Result<u64, errors::Error> {
+    Ok(oncall_user_contacts::Entity::delete_many()
+        .filter(oncall_user_contacts::Column::OrgId.eq(org_id))
+        .exec(db)
+        .await?
+        .rows_affected)
 }
 
 #[cfg(test)]
